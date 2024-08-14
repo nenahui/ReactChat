@@ -27,7 +27,11 @@ export const chatSlice = createSlice({
       })
       .addCase(chatMessagesFetch.fulfilled, (state, { payload: apiMessages }) => {
         state.messages = apiMessages;
-        state.lastMessageDate = apiMessages[0].createdAt;
+        if (apiMessages.length > 0) {
+          state.lastMessageDate = apiMessages[0].createdAt;
+        } else {
+          state.lastMessageDate = new Date().toISOString();
+        }
         state.isFetching = false;
       })
       .addCase(chatMessagesFetch.rejected, (state) => {

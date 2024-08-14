@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { SendOutlined } from '@mui/icons-material';
-import { Button, CircularProgress, Grid, TextField } from '@mui/material';
+import { Button, CircularProgress, Grid, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import type { Message, MessageMutation } from '../../types';
 import { selectChatIsFetching, selectChatIsSending, selectChatLastMessageDate, selectChatMessages } from './chatSlice';
@@ -96,7 +96,8 @@ export const Chat: React.FC = () => {
       </Grid>
 
       <Grid container direction={'column'} spacing={1}>
-        {isFetching && messages.length === 0 ? (
+        {messages.length === 0 && <Typography variant={'caption'}>The message list is empty...</Typography>}
+        {isFetching ? (
           <CircularProgress
             sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
           />
