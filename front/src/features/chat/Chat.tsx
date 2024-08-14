@@ -1,17 +1,40 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SendOutlined } from '@mui/icons-material';
 import { Button, CircularProgress, Grid, TextField } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import type { Message } from '../../types';
-import { selectChatIsFetching, selectChatLastMessageDate, selectChatMessages } from './chatSlice';
-import { chatMessagesFetch, chatCheckNewMessages } from './chatThunks';
+import type { Message, MessageMutation } from '../../types';
+import { selectChatIsFetching, selectChatIsSending, selectChatLastMessageDate, selectChatMessages } from './chatSlice';
+import { chatMessagesFetch, chatCheckNewMessages, sendMessage } from './chatThunks';
 import { ChatItem } from './components/chatItem';
 
 export const Chat: React.FC = () => {
   const messages = useAppSelector(selectChatMessages);
   const isFetching = useAppSelector(selectChatIsFetching);
+  const isSending = useAppSelector(selectChatIsSending);
   const lastMessageDate = useAppSelector(selectChatLastMessageDate);
   const dispatch = useAppDispatch();
+  const [messageMutation, setMessageMutation] = useState<MessageMutation>({
+    author: '',
+    message: '',
+  });
+
+  const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setMessageMutation((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await dispatch(sendMessage(messageMutation));
+    setMessageMutation((prevState) => ({
+      ...prevState,
+      message: '',
+    }));
+  };
 
   useEffect(() => {
     dispatch(chatMessagesFetch());
@@ -41,17 +64,32 @@ export const Chat: React.FC = () => {
 
   return (
     <>
-      <Grid container direction={'column'} spacing={2} component={'form'} mb={3}>
+      <Grid container direction={'column'} spacing={2} component={'form'} mb={3} onSubmit={onSubmit}>
         <Grid item>
-          <TextField label={'Author'} fullWidth required />
+          <TextField
+            label={'Author'}
+            fullWidth
+            required
+            name={'author'}
+            value={messageMutation.author}
+            onChange={onFieldChange}
+          />
         </Grid>
 
         <Grid item>
-          <TextField label={'Message'} fullWidth multiline required />
+          <TextField
+            label={'Message'}
+            fullWidth
+            multiline
+            required
+            name={'message'}
+            value={messageMutation.message}
+            onChange={onFieldChange}
+          />
         </Grid>
 
         <Grid item ml={'auto'}>
-          <Button variant={'outlined'} type={'submit'} endIcon={<SendOutlined />}>
+          <Button variant={'outlined'} type={'submit'} endIcon={<SendOutlined />} disabled={isSending}>
             Send Message
           </Button>
         </Grid>

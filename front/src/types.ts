@@ -4,3 +4,5 @@ export interface Message {
   author: string;
   message: string;
 }
+
+export type MessageMutation = Omit<Message, 'id' | 'createdAt'>;
