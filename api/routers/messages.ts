@@ -6,6 +6,19 @@ const messagesRouter = express.Router();
 
 messagesRouter.get('/', async (req, res) => {
   const messages = await fileDb.getItems();
+  const queryDate = req.query.datetime as string;
+  const date = new Date(queryDate);
+
+  if (req.query.datetime) {
+    if (isNaN(date.getDate())) {
+      return res.status(400).send({
+        error: 'Invalid date',
+      });
+    }
+
+    const filteredMessages = messages.filter((item) => item.createdAt > date.toISOString());
+    return res.send(filteredMessages);
+  }
 
   return res.send(messages);
 });
